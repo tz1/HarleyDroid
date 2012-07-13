@@ -65,6 +65,7 @@ public abstract class HarleyDroid extends Activity implements ServiceConnection,
 	private boolean mLogging = false;
 	private boolean mGPS = false;
 	private boolean mLogRaw = false;
+	private boolean mLogRawOnly = false;
 	protected HarleyDroidService mService = null;
 	protected boolean mUnitMetric = false;
 	protected int mOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -130,6 +131,12 @@ public abstract class HarleyDroid extends Activity implements ServiceConnection,
 		else if (mPrefs.getString("orientation", "auto").equals("landscape")) {
 			mOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 		}
+		else if (mPrefs.getString("orientation", "auto").equals("reversePortrait")) {
+			mOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+		}
+		else if (mPrefs.getString("orientation", "auto").equals("reverseLandscape")) {
+			mOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+		}
 		this.setRequestedOrientation(mOrientation);
 		mLogging = false;
 		if (mPrefs.getBoolean("logging", false)) {
@@ -140,6 +147,7 @@ public abstract class HarleyDroid extends Activity implements ServiceConnection,
 		}
 		mGPS = mPrefs.getBoolean("gps", false);
 		mLogRaw = mPrefs.getBoolean("lograw", false);
+		mLogRawOnly = mPrefs.getBoolean("lograwonly", false);
 		if (mPrefs.getBoolean("screenon", false))
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		if (mPrefs.getString("unit", "metric").equals("metric"))
@@ -197,7 +205,7 @@ public abstract class HarleyDroid extends Activity implements ServiceConnection,
 		else
 			mService.setInterfaceType(mInterfaceType, null);
 
-		mService.setLogging(mLogging, mUnitMetric, mGPS, mLogRaw);
+		mService.setLogging(mLogging, mUnitMetric, mGPS, mLogRaw, mLogRawOnly);
 		mService.setAutoReconnect(mAutoReconnect, Integer.parseInt(mReconnectDelay));
 	}
 

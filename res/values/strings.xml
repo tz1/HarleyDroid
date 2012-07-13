@@ -97,6 +97,7 @@
 <string name="pref_logging">Log to external media</string>
 <string name="pref_gps">Add GPS data to log</string>
 <string name="pref_lograw">Add raw J1850 data to log</string>
+<string name="pref_lograwonly">Raw log only (no GPS or timestamp)</string>
 <string name="pref_screenon">Keep the screen on</string>
 <string name="pref_unit">Unit system</string>
 <string-array name="pref_unit_names">
@@ -112,11 +113,15 @@
 	<item>"Auto"</item>
 	<item>"Portrait"</item>
 	<item>"Landscape"</item>
+	<item>"Reverse Portrait"</item>
+	<item>"Reverse Landscape"</item>
 </string-array>
 <string-array name="pref_orientation_values">
 	<item>"auto"</item>
 	<item>"portrait"</item>
 	<item>"landscape"</item>
+	<item>"reversePortrait"</item>
+	<item>"reverseLandscape"</item>
 </string-array>
 
 <string name="eula_title">License</string>

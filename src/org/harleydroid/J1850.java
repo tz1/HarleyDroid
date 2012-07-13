@@ -101,7 +101,7 @@ public class J1850 {
 		System.out.println("");
 		 */
 
-		hd.setRaw(buffer);
+		//hd.setRaw(buffer);
 
 		if (crc(in) != (byte)0xc4) {
 			hd.setBadCRC(buffer);
@@ -138,13 +138,15 @@ public class J1850 {
 			odolast = y - odolast;
 			if (odolast < 0)	// ...could also test for (x & 0x80)
 				odolast += 65536;
-			odoaccum += odolast;
+			if( y != 0 && odolast < 1000 ) // shut-down, restart will glitch
+				odoaccum += odolast;
 			odolast = y;
 			hd.setOdometer(odoaccum);
 		} else if ((x & 0xffffff7f) == 0xa883100a) {
 			fuellast = y - fuellast;
 			if (fuellast < 0)	// ...could also test for (x & 0x80)
 				fuellast += 65536;
+			if( y != 0 && fuellast < 1000 ) // shutdown, restart will glitch.
 			fuelaccum += fuellast;
 			fuellast = y;
 			hd.setFuel(fuelaccum);

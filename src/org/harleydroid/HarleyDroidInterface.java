@@ -20,6 +20,8 @@
 package org.harleydroid;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.concurrent.TimeoutException;
 //import java.util.UUID;
 
@@ -33,7 +35,7 @@ public class HarleyDroidInterface implements J1850Interface
 
 	//private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int ATMA_TIMEOUT = 10000;
-	private static final int MAX_ERRORS = 10;
+	private static final int MAX_ERRORS = 100;
 
 	private HarleyDroidService mHarleyDroidService;
 	private HarleyData mHD;
@@ -157,7 +159,7 @@ public class HarleyDroidInterface implements J1850Interface
 
 	private class PollThread extends Thread {
 		private boolean stop = false;
-
+		private int lastms = 0;
 		public void run() {
 			int errors = 0, idxJ;
 
@@ -179,17 +181,79 @@ public class HarleyDroidInterface implements J1850Interface
 					return;
 				}
 
+				//mHD.setRaw(line.getBytes());
 				// strip off timestamp
 				idxJ = line.indexOf('J');
 				if (idxJ != -1) {
+					mHD.setRaw(line.getBytes());
 					if (J1850.parse(myGetBytes(line, idxJ + 1, line.length()), mHD))
 						errors = 0;
 					else
 						++errors;
 				}
-				else
-					++errors;
-
+				else {
+					idxJ = line.indexOf('$');
+					byte nmea[] = line.getBytes();
+					if (idxJ != -1 && nmea[idxJ+1] == 'G' && ( nmea[idxJ+2] == 'P' || nmea[idxJ+2] == 'N' || nmea[idxJ+2] == 'L' ) ) {
+							/*
+231$GPGGA,013119.231,4228.7613,N,08314.6181,W,0,00,0.0,188.9,M,0.0,M,,0000*73
+231$GPRMC,013119.231,V,4228.7613,N,08314.6181,W,000.0,000.0,120712,,,N*67
+          time       lat  MMmm s lon   MMmm s f sa dop alt   u geo   u (dgps)
+831$GPGGA,013409.831,4228.6631,N,08314.5990,W,1,06,1.9,212.0,M,-34.2,M,,0000*69
+---012345678901234567890123456789012456789012345678901234567890123456789012345
+831$GPRMC,013409.831,A,4228.6631,N,08314.5990,W,011.5,100.0,120712,,,A*7
+          time       f lat         lon          spdkt trk   date  (mag)
+256$GPGSA,A,3, 10,25,02,12,17,20,04,,,,,, 2.6,1.6,2.0*34
+            3d                            PdopHdopVdop
+256$GPGSV,3,1,12, 04,75,033,41, 02,57,259,33, 10,52,149,42, 12,44,302,37 *7F
+256$GPGSV,3,2,12, 17,38,101,32, 05,13,194,29, 20,09,040,14, 25,09,323,26 *75
+256$GPGSV,3,3,12, 09,09,248,12, 23,08,067,23, 27,06,240,00, 28,06,158, *7B
+*/
+						try {
+							int j = idxJ+1;
+							int i = 0;
+							while( nmea[j] != '*' ) {
+								i = i ^ nmea[j];
+								j++;
+							}
+							j++; // skip *
+							i = i & 255;
+							int k = Integer.valueOf(line.substring(j,j+2), 16).intValue();
+							if( i != k ) {
+								String kerr = Integer.toHexString(k);
+								mHD.setRaw(kerr.getBytes());
+								++errors;	
+							}
+							else
+								errors = 0;
+							String mS = "000";
+							if( nmea[idxJ+3] == 'G' && nmea[idxJ+4] == 'S' ) {
+								NumberFormat formatter = new DecimalFormat("000");
+								mS = formatter.format(lastms);
+							}
+							else {
+								mS = line.substring(14,17);
+								lastms = Integer.parseInt(mS);
+							}
+							mS += line;
+							mHD.setRaw(mS.getBytes());
+							//mHD.setRaw(line.getBytes());
+						}					
+						catch (ArrayIndexOutOfBoundsException e) {
+							++errors;
+						}
+					}
+					else {				
+						idxJ = line.indexOf('=');
+						if( idxJ == 3 ) // PPS mark
+							mHD.setRaw(line.getBytes());							
+						else {
+							String out = "???" + line; // neither proper J or $GP message
+							mHD.setRaw(out.getBytes());							
+							++errors;
+						}
+					}
+				}
 				if (errors > MAX_ERRORS) {
 					mSock.close();
 					mSock = null;
