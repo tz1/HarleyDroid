@@ -79,7 +79,7 @@ public abstract class HarleyDroid extends Activity implements ServiceConnection,
 
 		if (DTRACE) Debug.startMethodTracing("harleydroid");
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		mAutoConnect = ( mBluetoothID != null );
+		mAutoConnect = true;
 		if (Eula.show(this, false))
 			onEulaAgreedTo();
 	}
@@ -117,7 +117,7 @@ public abstract class HarleyDroid extends Activity implements ServiceConnection,
 		// get preferences which may have been changed
 		mInterfaceType = mPrefs.getString("interfacetype", null);
 		mBluetoothID = mPrefs.getString("bluetoothid", null);
-		mAutoConnect = ( mBluetoothID != null ) && mAutoConnect && mPrefs.getBoolean("autoconnect", false);
+		mAutoConnect = mAutoConnect && mPrefs.getBoolean("autoconnect", false);
 		mAutoReconnect = mPrefs.getBoolean("autoreconnect", false);
 		mReconnectDelay = mPrefs.getString("reconnectdelay", "30");
 		if (mPrefs.getString("orientation", "auto").equals("auto"))

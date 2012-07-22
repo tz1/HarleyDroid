@@ -206,6 +206,8 @@ public class HarleyDroidService extends Service
 		case STATE_CONNECT:
 			switch (mCurrentState) {
 			case STATE_DISCONNECT:
+				if( mInterface == null )
+					return;
 				mCurrentState = STATE_TO_CONNECT;
 				notify(R.string.notification_connecting);
 				mHandler.obtainMessage(HarleyDroid.STATUS_CONNECTING, -1, -1).sendToTarget();
@@ -239,6 +241,8 @@ public class HarleyDroidService extends Service
 		case STATE_POLL:
 			switch (mCurrentState) {
 			case STATE_DISCONNECT:
+				if( mInterface == null )
+					return;
 				mCurrentState = STATE_TO_CONNECT;
 				notify(R.string.notification_connecting);
 				mHandler.obtainMessage(HarleyDroid.STATUS_CONNECTING, -1, -1).sendToTarget();

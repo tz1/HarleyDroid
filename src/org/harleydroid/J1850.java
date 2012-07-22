@@ -138,7 +138,7 @@ public class J1850 {
 			odolast = y - odolast;
 			if (odolast < 0)	// ...could also test for (x & 0x80)
 				odolast += 65536;
-			if( y != 0 && odolast < 1000 ) // shut-down, restart will glitch
+			if( y != 0 ) // shut-down, restart will glitch
 				odoaccum += odolast;
 			odolast = y;
 			hd.setOdometer(odoaccum);
@@ -146,8 +146,8 @@ public class J1850 {
 			fuellast = y - fuellast;
 			if (fuellast < 0)	// ...could also test for (x & 0x80)
 				fuellast += 65536;
-			if( y != 0 && fuellast < 1000 ) // shutdown, restart will glitch.
-			fuelaccum += fuellast;
+			if( y != 0 ) // shutdown, restart will glitch.
+				fuelaccum += fuellast;
 			fuellast = y;
 			hd.setFuel(fuelaccum);
 		} else if ((x == 0xa8836112) && ((in[4] & 0xd0) == 0xd0)) {

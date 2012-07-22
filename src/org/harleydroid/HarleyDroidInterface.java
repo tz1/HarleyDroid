@@ -229,7 +229,7 @@ public class HarleyDroidInterface implements J1850Interface
 							String mS = "000";
 							if( nmea[idxJ+3] == 'G' && nmea[idxJ+4] == 'S' ) {
 								NumberFormat formatter = new DecimalFormat("000");
-								mS = formatter.format(lastms);
+								mS = formatter.format(lastms + 1); // +1 will keep GGA and RMC together, this just after, improbably 999 as lastms
 							}
 							else {
 								mS = line.substring(14,17);
